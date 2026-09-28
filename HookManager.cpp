@@ -1,0 +1,2090 @@
+#include "HookManager.h"
+#include "GameData.h"
+#include "FUN.h"
+
+namespace
+{
+	void* gFlipMonsterTrampoline = nullptr;
+	void* gActivatableEffectTrampoline = nullptr;
+	void* gActivatableStEffectTrampoline = nullptr;
+	void* gInherentSpecialSummonTrampoline = nullptr;
+	void* gSpecialSummonTrampoline = nullptr;
+	void* gNormalSummonTrampoline = nullptr;
+	void* gPhaseTrampoline = nullptr;
+	void* gStatChangeTrampoline = nullptr;
+	void* gStatChangeTrampoline2 = nullptr;
+	void* gStatChangeTrampoline3 = nullptr;
+	void* gAfterDamageCalculationTrampoline = nullptr;
+	void* gNormalSummonTriggerTrampoline = nullptr;
+	void* gSpecialSummonTriggerTrampoline = nullptr; void* gSpecialSummonTriggerTrampoline2 = nullptr;
+	void* gOnSentToGraveTriggerTrampoline = nullptr; void* gOnSentToGraveTriggerTrampoline2 = nullptr;
+	void* gBanishOnLeavingFieldTrampoline = nullptr;
+	void* gInitialSummonStateTrampoline = nullptr;
+	void* gSummonStateTrampoline = nullptr;
+	void* gSelectionListPopulationTrampoline = nullptr;
+	void* gSpellSpeedTrampoline = nullptr;
+	void* gHasEffectInHandTrampoline = nullptr;
+	void* gHasEffectInHandTrampoline2 = nullptr;
+	void* gCanBeRevivedTrampoline = nullptr;
+	void* gCanBeTargetedTrampoline = nullptr;
+	void* gResponseTrampoline = nullptr;
+	void* gCanBeSpecialSummonedByEffectTrampoline = nullptr;
+	void* gListClickedTrampoline = nullptr;
+	void* gCardHoverTrampoline = nullptr;
+	void* gCardHoverTrampoline2 = nullptr;
+	void* gCardHoverTrampoline3 = nullptr;
+	void* gOnCardLeavingFieldTrampoline = nullptr;
+	void* gUnaffectedBySpellsTrampoline = nullptr;
+	void* gOnEffectActivatedTrampoline = nullptr;
+	void* gLimitStatusTrampoline = nullptr;
+	void* gSummonMonsterTrampoline = nullptr;
+}
+
+void HookManager::InstallHooks()
+{
+	hFlipMonster = Utils::InstallHook((void*)0x00567632, 5, PatchFlipMonster);
+	gFlipMonsterTrampoline = hFlipMonster.Trampoline;
+
+	hActivatableEffect = Utils::InstallHook((void*)0x00568042, 5, PatchActivatableEffect);
+	gActivatableEffectTrampoline = hActivatableEffect.Trampoline;
+
+	hActivatableStEffect = Utils::InstallHook((void*)0x005a0181, 5, PatchActivatableStEffect);
+	gActivatableStEffectTrampoline = hActivatableStEffect.Trampoline;
+
+	hInherentSpecialSummon = Utils::InstallHook((void*)0x00567a43, 5, PatchInherentSpecialSummon);
+	gInherentSpecialSummonTrampoline = hInherentSpecialSummon.Trampoline;
+
+	hSpecialSummonCondition = Utils::InstallHook((void*)0x005aaeaf, 5, PatchSpecialSummonCondition);
+	gSpecialSummonTrampoline = hSpecialSummonCondition.Trampoline;
+
+	hNormalSummonCondition = Utils::InstallHook((void*)0x005aac59, 7, PatchNormalSummonCondition);
+	gNormalSummonTrampoline = hNormalSummonCondition.Trampoline;
+
+	hPhase = Utils::InstallHook((void*)0x00404970, 5, PatchPhase);
+	gPhaseTrampoline = hPhase.Trampoline;
+
+	hStatChange = Utils::InstallHook((void*)0x0056dde9, 5, PatchStatChange);
+	gStatChangeTrampoline = hStatChange.Trampoline;
+
+	hStatChange2 = Utils::InstallHook((void*)0x0056e77a, 5, PatchStatCHange2);
+	gStatChangeTrampoline2 = hStatChange2.Trampoline;
+
+	hStatChange3 = Utils::InstallHook((void*)0x0056ec35, 5, PatchStatChange3);
+	gStatChangeTrampoline3 = hStatChange3.Trampoline;
+
+	hAfterDamageCalculation = Utils::InstallHook((void*)0x00407aae, 5, PatchAfterDamageCalculation);
+	gAfterDamageCalculationTrampoline = hAfterDamageCalculation.Trampoline;
+
+	hNormalSummonTrigger = Utils::InstallHook((void*)0x005ac08c, 5, PatchNormalSummonTrigger);
+	gNormalSummonTriggerTrampoline = hNormalSummonTrigger.Trampoline;
+
+	hSpecialSummonTrigger = Utils::InstallHook((void*)0x005ad62c, 5, PatchSpecialSummonTrigger);
+	gSpecialSummonTriggerTrampoline = hSpecialSummonTrigger.Trampoline;
+	hSpecialSummonTrigger2 = Utils::InstallHook((void*)0x005ad13b, 5, PatchSpecialSummonTrigger);
+	gSpecialSummonTriggerTrampoline2 = hSpecialSummonTrigger2.Trampoline;
+
+	hOnSentToGraveTrigger = Utils::InstallHook((void*)0x00576f26, 5, PatchOnSentToGraveTrigger);
+	gOnSentToGraveTriggerTrampoline = hOnSentToGraveTrigger.Trampoline;
+	hOnSentToGraveTrigger2 = Utils::InstallHook((void*)0x00577d4b, 5, PatchOnSentToGraveTrigger2);
+	gOnSentToGraveTriggerTrampoline2 = hOnSentToGraveTrigger2.Trampoline;
+
+	hBanishOnLeavingField = Utils::InstallHook((void*)0x00576b58, 7, PatchBanishOnLeavingField);
+	gBanishOnLeavingFieldTrampoline = hBanishOnLeavingField.Trampoline;
+
+	hInitialSummonState = Utils::InstallHook((void*)0x0059df41, 5, PatchInitialSummonState);
+	gInitialSummonStateTrampoline = hInitialSummonState.Trampoline;
+
+	hSummonState = Utils::InstallHook((void*)0x0059deed, 6, PatchSummonState);
+	gSummonStateTrampoline = hSummonState.Trampoline;
+
+	hSelectionListPopulation = Utils::InstallHook((void*)0x00599da4, 5, PatchSelectionListPopulation);
+	gSelectionListPopulationTrampoline = hSelectionListPopulation.Trampoline;
+
+	hSpellSpeed = Utils::InstallHook((void*)0x0057e06f, 5, PatchSpellSpeed);
+	gSpellSpeedTrampoline = hSpellSpeed.Trampoline;
+
+	hHasEffectInHand = Utils::InstallHook((void*)0x005682e2, 5, PatchHasEffectInHand);
+	gHasEffectInHandTrampoline = hHasEffectInHand.Trampoline;
+
+	hHasEffectInHand2 = Utils::InstallHook((void*)0x005b8e10, 5, PatchHasEffectInHand2);
+	gHasEffectInHandTrampoline2 = hHasEffectInHand2.Trampoline;
+
+	hCanBeRevived = Utils::InstallHook((void*)0x00568bd8, 5, PatchCanBeRevived);
+	gCanBeRevivedTrampoline = hCanBeRevived.Trampoline;
+
+	hCanBeTargeted = Utils::InstallHook((void*)0x0056c510, 6, PatchCanBeTargeted);
+	gCanBeTargetedTrampoline = hCanBeTargeted.Trampoline;
+
+	hCanBeSpecialSummonedByEffect = Utils::InstallHook((void*)0x00570ac1, 5, PatchCanBeSpecialSummonedByEffect);
+	gCanBeSpecialSummonedByEffectTrampoline = hCanBeSpecialSummonedByEffect.Trampoline;
+
+	hCardHover = Utils::InstallHook((void*)0x005a0206, 5, PatchCardHover);
+	gCardHoverTrampoline = hCardHover.Trampoline;
+
+	hCardHover2 = Utils::InstallHook((void*)0x005b8da4, 7, PatchInputProcess);
+	gCardHoverTrampoline2 = hCardHover2.Trampoline;
+
+	hOnCardLeavingField = Utils::InstallHook((void*)0x00576a80, 5, PatchCardLeavingField);
+	gOnCardLeavingFieldTrampoline = hOnCardLeavingField.Trampoline;
+
+	hUnAffectedBySpell = Utils::InstallHook((void*)0x0056c460, 5, PatchUnAffectedBySpell);
+	gUnaffectedBySpellsTrampoline = hUnAffectedBySpell.Trampoline;
+
+	hOnEffectActivated = Utils::InstallHook((void*)0x0057ef00, 5, PatchOnEffectActivated);
+	gOnEffectActivatedTrampoline = hOnEffectActivated.Trampoline;
+
+	hSummonMonster = Utils::InstallHook((void*)0x005ad890, 6, PatchSummonMonster);
+	gSummonMonsterTrampoline = hSummonMonster.Trampoline;
+
+
+	PatchLoader::LoadPatches();
+
+	for (const auto& id : PatchLoader::InherentSpecialSummons)
+	{
+		Register_InherentSpecialSummon(id, true);
+	}
+	for (const auto& id : PatchLoader::ActivatableCards)
+	{
+		Register_ActivatableEffect(id);
+	}
+	for (const auto& id : PatchLoader::FlipMonsters)
+	{
+		Register_FlipMonster(id);
+	}
+	for (const auto& spellSpeed : PatchLoader::SpellSpeeds)
+	{
+		Register_SpellSpeed(spellSpeed.CardID, spellSpeed.Speed);
+	}
+	for (const auto& script : PatchLoader::EffectScripts)
+	{
+		Register_EffectScript(script);
+	}
+	for (const auto& fusion2 : PatchLoader::FusionRecipes2)
+	{
+		Register_Fusion2(fusion2);
+	}
+	for (const auto& fusion3 : PatchLoader::FusionRecipes3)
+	{
+		Register_Fusion3(fusion3);
+	}
+
+	Register_Phase(5, ReturnSpiritsToHand);
+
+	EffectScript* arrayStart = effectScripts;
+	Utils::WriteUint32((void*)0x5ed0a8, (uint32_t)arrayStart);
+	hCardEffectSctript1 = Utils::InstallHook((void*)0x0059dc13, 7, PatchCardEffectScript1);
+	hCardEffectSctript2 = Utils::InstallHook((void*)0x0059dc62, 7, PatchCardEffectScript2);
+	hCardEffectSctript3 = Utils::InstallHook((void*)0x0059dce2, 7, PatchCardEffectScript3);
+	hCardEffectSctript4 = Utils::InstallHook((void*)0x0059dd4f, 6, PatchCardEffectScript4);
+	hCardEffectSctript5 = Utils::InstallHook((void*)0x0059ddef, 7, PatchCardEffectScript5);
+	hCardEffectSctript6 = Utils::InstallHook((void*)0x0059de2f, 7, PatchCardEffectScript6);
+	hCardEffectSctript7 = Utils::InstallHook((void*)0x0059de6c, 7, PatchCardEffectScript7);
+	hCardEffectSctript8 = Utils::InstallHook((void*)0x005b3e4c, 7, PatchCardEffectScript8);
+	hCardEffectSctript9 = Utils::InstallHook((void*)0x005bb1f1, 7, PatchCardEffectScript9);
+	hcardEffectScript10 = Utils::InstallHook((void*)0x005bb316, 7, PatchCardEffectScript10);
+	hcardEffectScript11 = Utils::InstallHook((void*)0x005bba21, 7, PatchCardEffectScript11);
+
+	Utils::PatchCall(0x0059dbfd, M_GetEffectScriptIndex);
+	Utils::PatchCall(0x0059dc53, M_GetEffectScriptIndex);
+	Utils::PatchCall(0x0059dcd3, M_GetEffectScriptIndex);
+	Utils::PatchCall(0x0059dd3d, M_GetEffectScriptIndex);
+	Utils::PatchCall(0x0059ddd9, M_GetEffectScriptIndex);
+	Utils::PatchCall(0x0059de19, M_GetEffectScriptIndex);
+	Utils::PatchCall(0x0059de59, M_GetEffectScriptIndex);
+	Utils::PatchCall(0x005b3def, M_GetEffectScriptIndex);
+	Utils::PatchCall(0x005bb1d0, M_GetEffectScriptIndex);
+	Utils::PatchCall(0x005bb2f5, M_GetEffectScriptIndex);
+	Utils::PatchCall(0x005bba12, M_GetEffectScriptIndex);
+
+
+	Utils::PatchCall(0x0059be65, M_GetFusionMaterial);
+	Utils::PatchCall(0x00591578, M_GetNumOfFusionReqs);
+	Utils::PatchCall(0x00591640, M_GetNumOfFusionReqs);
+	Utils::PatchCall(0x005922cc, M_GetNumOfFusionReqs);
+	Utils::PatchCall(0x0059bde6, M_GetNumOfFusionReqs);
+	Utils::PatchCall(0x005805f3, M_CanFuse);
+	Utils::PatchCall(0x005922b2, M_CanFuse);
+	Utils::PatchCall(0x0059c190, M_CanFuse);
+
+	// Limits
+	std::fill(cardLimits, cardLimits + 4096, 3); // Default limit is 3 for all cards
+	uint32_t* limitArray = (uint32_t*)0x005efbcc;
+	for (size_t i = 0; i < 38; i++)
+	{
+		uint32_t item = limitArray[i];
+		uint16_t cardID = item & 0xFFF;
+		uint16_t limit = (item >> 16) & 0xFFFF;
+		cardLimits[FUN::GetCardIntID(cardID)] = limit;
+	}
+	hLimitStatus = Utils::InstallHook((void*)0x005be206, 5, PatchLimitStatus);
+
+	Register_SelectionListPopulation(0x1c1, LoadSelectionListExtra);
+	Register_SelectionListPopulation(0x274, LoadSelectionListGrave);
+	Register_SummonState(0xff, ExtraSummonState);
+}
+void HookManager::SetOncePerTurnFlag(uint8_t side, uint8_t zone)
+{
+	FUN::W_AddEffectEntityToZone(side, zone, 0, 0xf);
+}
+void __stdcall ResetOncePerTurnFlags()
+{
+	GameData::Duel* duel = GameData::GetDuel();
+	for (size_t i = 0; i < 2; i++)
+	{
+		for (size_t j = 0; j < 11; j++)
+		{
+			if (duel->players[i].monsterZones[j].card.GetIntID() != 0 && duel->players[i].monsterZones[j].effectCount != 0)
+			{
+				for (size_t k = 0; k < duel->players[i].monsterZones[j].effectCount;)
+				{
+					if (duel->players[i].monsterZones[j].effectEntries[k].type == 0xf)
+					{
+						FUN::RemoveEffectEntity(i, j, k);
+					}
+					else k++; // Only increment k if we didn't remove an effect, since removing shifts the array down
+				}
+			}
+		}
+	}
+}
+void __stdcall ReturnSpiritsToHand()
+{
+	GameData::Duel* duel = GameData::GetDuel();
+
+	FUN::FieldMaskGenerator maskGen;
+	for (size_t i = 0; i < 2; i++)
+	{
+		for (size_t j = 0; j < 5; j++)
+		{
+			uint16_t cardIntID = duel->players[i].monsterZones[j].card.GetIntID();
+			if (cardIntID != 0 && duel->players[i].monsterZones[j].IsFaceUp())
+			{
+				uint16_t cardID = FUN::GetCardID(cardIntID);
+				for (const auto& id : HookManager::spiritMonsters)
+				{
+					if (id == cardID)
+					{
+						maskGen.zones[i][j] = true;
+						FUN::FlashCardPortrait(j, cardIntID, 0);
+					}
+				}
+				
+			}
+		}
+	}
+
+	uint8_t block[32] = {};
+	FUN::SendCardFromField(block, maskGen.GenerateMask(), 0xb, 0);
+}
+uint32_t __stdcall HookManager::ExtraSummonState()
+{
+	switch (HookManager::innerExtraSummonState)
+	{
+		case 0:
+		{
+			FUN::InitiateSelectionList(GameData::GetTurnPlayer(), 6, 0x1c1, Location::EXTRA);
+
+			HookManager::innerExtraSummonState = 1;
+		}break;
+		case 1:
+		{
+			uint32_t count = FUN::GetSelectionListCount();
+			if (count == 0) return 0;
+
+			uint32_t* entry = (uint32_t*)FUN::GetSelectedItem();
+			if (!entry || (*entry & 0xFFF) == 0) return 0;
+
+			HookManager::selectedExtraMonster = FUN::GetCardID(*entry & 0xFFF);
+
+			HookManager::innerExtraSummonState = 2;
+		}break;
+		case 2:
+		{
+			uint32_t result = 0;
+			for (const auto& extraMonster : HookManager::extraMonsters)
+			{
+				if (HookManager::selectedExtraMonster == extraMonster.cardID)
+				{
+					result = extraMonster.summonState();
+					break;
+				}
+			}
+			if (result != 0)
+			{
+				HookManager::innerExtraSummonState = 0;
+				HookManager::extraRunning = 0;
+				uint32_t& runningFlag = *(uint32_t*)0x00a57804;
+				runningFlag &= 0xfffffffd;
+
+				return 1;
+			}
+		}break;
+	}
+
+	return 0;
+}
+void __stdcall LoadSelectionListExtra()
+{
+	auto duel = GameData::GetDuel();
+	std::vector<uint32_t> extras;
+	GameData::Player player = duel->players[GameData::GetTurnPlayer()];
+
+	for (size_t i = 0; i < player.cardsInExtra; i++)
+	{
+		uint16_t cardInExtra = FUN::GetCardID(player.extra[i].GetIntID());
+		for (const auto& extraMonster : HookManager::extraMonsters)
+		{
+			if (cardInExtra == extraMonster.cardID && extraMonster.summonCondition(1))
+			{
+				extras.push_back(player.extra[i].fullValue);
+			}
+		}
+	}
+
+	GameData::ChangeSelectionList(extras, 8);
+
+}
+void __stdcall LoadSelectionListGrave()
+{
+	auto duel = GameData::GetDuel();
+	std::vector<uint32_t> graveCards;
+	GameData::Player player = duel->players[GameData::GetTurnPlayer()];
+	for (size_t i = 0; i < player.cardsInGrave; i++)
+	{
+		uint16_t cardInGrave = player.grave[i].GetCardID();
+		for (const auto& id : HookManager::activatableGraveEffects)
+		{
+			if (cardInGrave == id)
+			{
+				graveCards.push_back(player.grave[i].fullValue);
+			}
+		}
+	}
+	GameData::ChangeSelectionList(graveCards, 4);
+}
+bool __stdcall HookManager::Dispatch_CardHover()
+{
+	GameData::Duel* duel = GameData::GetDuel();
+	uint8_t localSide = GameData::GetLocalSide();
+
+	if (GameData::GetTurnPlayer() != localSide) return false;
+	if (GameData::GetSelectedSide() != localSide) return false;
+	if (GameData::GetSelectedLocation() == Location::EXTRA)
+	{
+		if (duel->players[localSide].cardsInExtra == 0) return false;
+
+		for (size_t i = 0; i < duel->players[localSide].cardsInExtra; i++)
+		{
+			uint16_t cardInExtra = FUN::GetCardID(duel->players[localSide].extra[i].GetIntID());
+			for (const auto& extraMonster : HookManager::extraMonsters)
+			{
+				if (cardInExtra == extraMonster.cardID && extraMonster.summonCondition(localSide))
+				{
+					return true;
+				}
+			}
+		}
+	}
+	else if (GameData::GetSelectedLocation() == Location::GRAVE)
+	{
+		if (duel->players[localSide].cardsInGrave == 0) return false;
+
+		for (size_t i = 0; i < duel->players[localSide].cardsInGrave; i++)
+		{
+			uint16_t cardID = duel->players[localSide].grave[i].GetCardID();
+			for (const auto& id : HookManager::activatableGraveEffects)
+			{
+				if (cardID == id)
+				{
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+__declspec(naked) void PatchCardHover()
+{
+	__asm
+	{
+	hook:
+		PUSH EAX
+		CALL HookManager::Dispatch_CardHover
+		TEST AL, AL
+		POP EAX
+		JZ hook_end
+		OR ESI, 0x8
+	hook_end:
+		MOV AX, SI
+		PUSH 0x005a0160
+		RET
+	}
+}
+__declspec(naked) void PatchInputProcess()
+{
+	__asm
+	{
+	hook:
+		PUSH EAX
+		MOV AL, BYTE PTR DS : [0x00a577fa] // Turn player
+		XOR AL, BYTE PTR DS : [0x00a54e5c] // Local side
+		TEST AL, 0x1
+		POP EAX
+		JNZ hook_end
+
+		CMP BYTE PTR DS : [0x00a55048] , 0xc
+		JE hook_extra
+		CMP HookManager::extraRunning, 0x1
+		JE hook_extra
+		CMP BYTE PTR DS : [0x00a55048] , 0xe
+		JE hook_grave
+		CMP HookManager::graveRunning, 0x1
+		JGE hook_grave
+	hook_end:
+		JMP[gCardHoverTrampoline2]
+	hook_extra:
+		MOV HookManager::extraRunning, 0x1
+		PUSH 0x005b8d84
+		RET
+	hook_grave:
+		call HookManager::Dispatch_ActivatableGraveEffect
+		PUSH 0x005b8d92
+		RET
+	}
+}
+void HookManager::Register_ActivatableGraveEffect(uint16_t cardID)
+{
+	// Check if the card ID is already registered
+	for (const auto& id : activatableGraveEffects)
+	{
+		if (id == cardID) return;
+	}
+	activatableGraveEffects.push_back(cardID);
+}
+uint32_t HookManager::Dispatch_ActivatableGraveEffect()
+{
+	switch (HookManager::graveRunning)
+	{
+		case 0:
+		{
+			FUN::InitiateSelectionList(GameData::GetTurnPlayer(), 6, 0x274, Location::GRAVE);
+			HookManager::graveRunning = 1;
+		}break;
+		case 1:
+		{
+			uint32_t count = FUN::GetSelectionListCount();
+			if (count == 0) return 0;
+
+			HookManager::selectedGraveCard = reinterpret_cast<GameData::Card*>(FUN::GetSelectedItem());
+
+			HookManager::graveRunning = 2;
+		}break;
+		case 2:
+		{
+			uint32_t pack = ((uint32_t)(Location::GRAVE & 0x1F) | ((uint32_t)GameData::GetTurnPlayer() << 0xf) | 0x0A20u) << 16 | HookManager::selectedGraveCard->GetIntID();
+
+			FUN::QueueEffect(pack, HookManager::selectedGraveCard->GetInstance(), 0);
+			HookManager::graveRunning = 0;
+
+			return 1;
+		}break;
+	}
+
+	return 0;
+}
+void HookManager::Register_EffectScript(EffectScript script)
+{
+	uint16_t index = FUN::GetCardIntID(script.CardID);
+
+	effectScripts[index].CardID = script.CardID;
+	effectScripts[index].Effect = script.Effect;
+	effectScripts[index].AppliesTo = script.AppliesTo;
+	effectScripts[index].Condition = script.Condition;
+	effectScripts[index].Cost = script.Cost;
+	effectScripts[index].Target = script.Target;
+}
+void HookManager::Register_Fusion2(Fusion2 fusion)
+{
+	uint16_t index = FUN::GetCardIntID(fusion.Result);
+
+	fusionRecipes2[index].Result = fusion.Result;
+	fusionRecipes2[index].Materials[0] = fusion.Materials[0];
+	fusionRecipes2[index].Materials[1] = fusion.Materials[1];
+}
+void HookManager::Register_Fusion3(Fusion3 fusion)
+{
+	uint16_t index = FUN::GetCardIntID(fusion.Result);
+
+	fusionRecipes3[index].Result = fusion.Result;
+	fusionRecipes3[index].Materials[0] = fusion.Materials[0];
+	fusionRecipes3[index].Materials[1] = fusion.Materials[1];
+	fusionRecipes3[index].Materials[2] = fusion.Materials[2];
+}
+void HookManager::SetLimitStatus(uint16_t cardID, uint16_t limit)
+{
+	uint32_t cardIntID = FUN::GetCardIntID(cardID);
+	cardLimits[cardIntID] = limit;
+}
+uint16_t __stdcall HookManager::Dispatch_LimitStatus(uint16_t cardIntID)
+{
+	uint16_t limit = cardLimits[cardIntID];
+	uint8_t disallowBanned = *(uint8_t*)0x00a54dae;
+	if (limit == 0 && disallowBanned == 0) limit = 1; // If the card is banned, but the game is set to allow banned cards, treat it as limited instead
+
+	return limit;
+}
+__declspec(naked) void PatchLimitStatus()
+{
+	__asm
+	{
+	hook:
+		CALL HookManager::Dispatch_LimitStatus
+		PUSH 0x005be234
+		RET
+	}
+}
+void HookManager::Register_SpiritMonster(uint16_t cardID)
+{
+	// Check if the card ID is already registered
+	for (const auto& id : spiritMonsters)
+	{
+		if (id == cardID) return;
+	}
+	spiritMonsters.push_back(cardID);
+	Register_CanBeSummonedByEffect(cardID, false);
+}
+bool HookManager::IsSpiritMonster(uint16_t cardID)
+{
+	for (const auto& id : spiritMonsters)
+	{
+		if (id == cardID) return true;
+	}
+	return false;
+}
+void HookManager::Register_TunerMonster(uint16_t cardID)
+{
+	// Check if the card ID is already registered
+	for (const auto& id : tunerMonsters)
+	{
+		if (id == cardID) return;
+	}
+	tunerMonsters.push_back(cardID);
+}
+bool HookManager::IsTunerMonster(uint16_t cardID)
+{
+	for (const auto& id : tunerMonsters)
+	{
+		if (id == cardID) return true;
+	}
+	return false;
+}
+void HookManager::Register_ExtraSummonMonster(uint16_t cardID, Condition summonCondition, State summonState)
+{
+	// Check if the card ID is already registered
+	for (const auto& item : extraMonsters)
+	{
+		if (item.cardID == cardID) return;
+	}
+	extraMonsters.push_back({ cardID, summonCondition, summonState });
+}
+void HookManager::Register_FlipMonster(uint16_t cardID)
+{
+	// Check if the card ID is already registered
+	for (const auto& id : flipMonsters)
+	{
+		if (id == cardID) return;
+	}
+	flipMonsters.push_back(cardID);
+}
+bool __stdcall HookManager::Dispatch_FlipMonster(uint16_t cardID)
+{
+	for (const auto& id : flipMonsters)
+	{
+		if (id == cardID)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+__declspec(naked) void PatchFlipMonster()
+{
+	__asm
+	{
+	hook:
+		PUSH EAX
+		PUSH EAX
+		CALL HookManager::Dispatch_FlipMonster
+		TEST AL, AL
+		POP EAX
+		JZ hook_end
+
+		PUSH 0x00567716
+		RET
+	hook_end :
+		JMP[gFlipMonsterTrampoline]
+	}
+}
+void HookManager::Register_OnMonsterSummon(Event event)
+{
+	onMonsterSummonHooks.push_back({ event });
+}
+void __stdcall HookManager::Dispatch_OnMonsterSummon()
+{
+	for (const auto& event : onMonsterSummonHooks)
+	{
+		event();
+	}
+}
+__declspec(naked) void PatchSummonMonster()
+{
+	__asm
+	{
+	hook:
+		PUSH EAX
+		CALL HookManager::Dispatch_OnMonsterSummon
+		POP EAX
+	hook_end :
+		JMP[gSummonMonsterTrampoline]
+	}
+}
+void HookManager::Register_OnCardLeavingField(LeavingFieldEvent event)
+{
+	onCardLeavingFieldHooks.push_back({ event });
+}
+bool __stdcall HookManager::Dispatch_OnCardLeavingField(uint32_t side, uint32_t zone, uint32_t* dest, uint32_t* action, uint32_t* effectIntID)
+{
+	for (const auto& event : onCardLeavingFieldHooks)
+	{
+		if (event(side, zone, dest, action, effectIntID)) return true;
+	}
+	return false;
+}
+__declspec(naked) void PatchCardLeavingField()
+{
+	__asm
+	{
+	hook:
+		PUSH EAX
+		LEA EAX, [ESP + 0x18]
+		PUSH EAX
+		LEA EAX, [ESP + 0x18]
+		PUSH EAX
+		LEA EAX, [ESP + 0x18]
+		PUSH EAX
+		PUSH DWORD PTR DS : [ESP + 0x18]
+		PUSH DWORD PTR DS : [ESP + 0x18]
+		CALL HookManager::Dispatch_OnCardLeavingField
+		TEST AL, AL
+		POP EAX
+		JZ hook_end
+		XOR EAX, EAX
+		PUSH 0x00576e75
+		RET
+	hook_end :
+		JMP[gOnCardLeavingFieldTrampoline]
+	}
+}
+void HookManager::Register_OnEffectActivated(EffectActivatedEvent event)
+{
+	onEffectActivatedHooks.push_back({ event });
+}
+void HookManager::Dispatch_OnEffectActivated(unsigned int* srcParam, uint8_t respondingSide)
+{
+	for (const auto& event : onEffectActivatedHooks)
+	{
+		event(srcParam, respondingSide);
+	}
+}
+__declspec(naked) void PatchOnEffectActivated()
+{
+	__asm
+	{
+	hook:
+		PUSH EAX
+		PUSH DWORD PTR DS : [ESP + 0xc]
+		PUSH DWORD PTR DS : [ESP + 0xc]
+		CALL HookManager::Dispatch_OnEffectActivated
+		POP EAX
+	hook_end:
+		JMP[gOnEffectActivatedTrampoline]
+	}
+}
+void HookManager::Register_CanBeSummonedByEffect(uint16_t cardID, bool canBeSpecialSummoned)
+{
+	// Check if the card ID is already registered
+	for (const auto& item : canBeSpecialSummonedByEffectHooks)
+	{
+		if (item.cardID == cardID) return;
+	}
+	canBeSpecialSummonedByEffectHooks.push_back({ cardID, canBeSpecialSummoned });
+}
+uint32_t __stdcall HookManager::Dispatch_CanBeSummonedByEffect(uint16_t cardIntID)
+{
+	uint16_t cardID = FUN::GetCardID(cardIntID);
+	for (const auto& item : canBeSpecialSummonedByEffectHooks)
+	{
+		if (item.cardID == cardID)
+		{
+			if (item.canBeSpecialSummoned)
+			{
+				return 1; // Can be special summoned
+			}
+			else
+			{
+				return 0; // Cannot be special summoned
+			}
+		}
+	}
+	if (FUN::GetCardSubType(cardIntID) == SubType::FUSION) return 1; // A "fix" to the original logic. I think it should work like this.
+	return 2; // Not found
+}
+__declspec(naked) void PatchCanBeSpecialSummonedByEffect()
+{
+	__asm
+	{
+	hook:
+		PUSH EAX
+		PUSH DWORD PTR DS : [ESP + 0x10]
+		CALL HookManager::Dispatch_CanBeSummonedByEffect
+		CMP EAX, 0x2
+		JE hook_end
+		ADD ESP, 0x4
+		PUSH 0x00570af9
+		RET
+	hook_end :
+		POP EAX
+		JMP[gCanBeSpecialSummonedByEffectTrampoline]
+	}
+}
+void HookManager::Register_ActivatableEffect(uint16_t cardID)
+{
+	// Check if the card ID is already registered
+	for (const auto& id : activatableEffects)
+	{
+		if (id == cardID) return;
+	}
+	activatableEffects.push_back(cardID);
+}
+bool __stdcall HookManager::Dispatch_ActivatableEffect(uint16_t cardID)
+{
+	for (const auto& id : activatableEffects)
+	{
+		if (id == cardID)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+__declspec(naked) void PatchActivatableEffect()
+{
+	__asm
+	{
+	hook:
+		PUSH EAX
+		PUSH EAX
+		CALL HookManager::Dispatch_ActivatableEffect
+		TEST AL, AL
+		POP EAX
+		JZ hook_end
+
+		PUSH 0x0056813b
+		RET
+	hook_end :
+		JMP[gActivatableEffectTrampoline]
+	}
+}
+void HookManager::Register_UnAffectedBySpells(Condition1 condition)
+{
+	unAffectedBySpellHooks.push_back({ condition });
+}
+bool __stdcall HookManager::Dispatch_UnAffectedBySpells(uint8_t side, uint8_t zone)
+{
+	for (const auto& hook : unAffectedBySpellHooks)
+	{
+		if (hook(side, zone)) return true;
+	}
+	return false;
+}
+__declspec(naked) void PatchUnAffectedBySpell()
+{
+	__asm
+	{
+	hook:
+		PUSH EAX
+		PUSH DWORD PTR DS : [ESP + 0xc]
+		PUSH DWORD PTR DS : [ESP + 0xc]
+		CALL HookManager::Dispatch_UnAffectedBySpells
+		TEST AL, AL
+		POP EAX
+		JZ hook_end
+		MOV EAX, 0x1
+		PUSH 0x0056c504
+		RET
+	hook_end :
+		JMP[gUnaffectedBySpellsTrampoline]
+	}
+}
+void HookManager::Register_ActivatableStEffect(uint16_t cardID)
+{
+	// Check if the card ID is already registered
+	for (const auto& id : activatableStEffects)
+	{
+		if (id == cardID) return;
+	}
+	activatableStEffects.push_back(cardID);
+}
+bool __stdcall HookManager::Dispatch_ActivatableStEffect(uint16_t _cardIntID, uint8_t zoneIdx)
+{
+	uint8_t selectedSide = GameData::GetSelectedSide();
+	uint8_t turnPlayer = GameData::GetTurnPlayer();
+	uint8_t selectedZone = GameData::GetSelectedZone();
+
+	if (turnPlayer != selectedSide) return false;
+
+	uint16_t cardIntID = _cardIntID & 0xfff;
+	uint16_t cardID = FUN::GetCardID(cardIntID);
+	for (const auto& id : activatableStEffects)
+	{
+		if (id == cardID)
+		{
+			FUN::EffectBlock block = { turnPlayer, cardIntID, selectedZone, selectedSide };
+
+			uint8_t nullBlock[32] = {};
+
+			auto condition = reinterpret_cast<bool(__cdecl*)(unsigned int* param, unsigned int* param2, unsigned int* param3)>(effectScripts[cardIntID & 0xfff].Condition);
+
+			if (condition && condition((unsigned int*)&block, (unsigned int*)&nullBlock, (unsigned int*)&nullBlock))
+			{
+				return true;
+			}
+
+			break;
+		}
+	}
+	return false;
+}
+__declspec(naked) void PatchActivatableStEffect()
+{
+	__asm
+	{
+	hook:
+		PUSH EAX
+		PUSH DWORD PTR DS : [ESP + 0x10]
+		PUSH ECX
+		CALL HookManager::Dispatch_ActivatableStEffect
+		TEST AL, AL
+		POP EAX
+		JZ hook_end
+		ADD ESP, 0xc
+		MOV ESI, EAX
+		OR ESI, 0x8
+		MOV AX, SI
+		PUSH 0x005a0189
+		RET
+	hook_end :
+		JMP[gActivatableStEffectTrampoline]
+	}
+}
+void HookManager::Register_InherentSpecialSummon(uint16_t cardID, bool firstOnly)
+{
+	// Check if the card ID is already registered
+	for (const auto& id : inherentSpecialSummons)
+	{
+		if (id == cardID) return;
+	}
+	inherentSpecialSummons.push_back(cardID);
+	if (!firstOnly)
+	{
+		HookManager::Register_UnRevivable(cardID);
+	}
+}
+bool __stdcall HookManager::Dispatch_InherentSpecialSummon(uint16_t cardID)
+{
+	for (const auto& id : inherentSpecialSummons)
+	{
+		if (id == cardID)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+__declspec(naked) void PatchInherentSpecialSummon()
+{
+	__asm
+	{
+	hook:
+		PUSH EAX
+		PUSH EAX
+		CALL HookManager::Dispatch_InherentSpecialSummon
+		TEST AL, AL
+		POP EAX
+		JZ hook_end
+
+		PUSH 0x00567ab0
+		RET
+	hook_end :
+		JMP[gInherentSpecialSummonTrampoline]
+	}
+}
+void HookManager::Register_SpecialSummonCondition(uint16_t id, Condition condition)
+{
+	// Check if the card ID is already registered
+	for (const auto& hook : specialSummonHooks)
+	{
+		if (hook.cardID == id) return;
+	}
+	specialSummonHooks.push_back({ id, condition });
+}
+bool __stdcall HookManager::Dispatch_SpecialSummonCondition(uint16_t id, uint32_t playerIdx)
+{
+	for (const auto& hook : specialSummonHooks)
+	{
+		if (hook.cardID == id)
+		{
+			return hook.condition(playerIdx);
+		}
+	}
+	return false;
+}
+__declspec(naked) void PatchSpecialSummonCondition()
+{
+	__asm
+	{
+	hook:
+		PUSH EAX
+		PUSH DWORD PTR DS : [ESP + 8]
+		PUSH EAX
+		CALL HookManager::Dispatch_SpecialSummonCondition
+		TEST AL, AL
+		POP EAX
+		JZ hook_end
+
+		PUSH 0x005ab148
+		RET
+	hook_end :
+		JMP[gSpecialSummonTrampoline]
+	}
+}
+void HookManager::Register_NormalSummonCondition(uint16_t id, Condition condition)
+{
+	// Check if the card ID is already registered
+	for (const auto& hook : normalSummonHooks)
+	{
+		if (hook.cardID == id) return;
+	}
+	normalSummonHooks.push_back({ id, condition });
+}
+uint32_t __stdcall HookManager::Dispatch_NormalSummonCondition(uint16_t id, uint32_t playerIdx)
+{
+	for (const auto& hook : normalSummonHooks)
+	{
+		if (hook.cardID == id)
+		{
+			if (hook.condition(playerIdx)) return 1;
+			else return 2;
+		}
+	}
+	return 0; // 0 = not found, 1 = can summon, 2 = cannot summon
+}
+__declspec(naked) void PatchNormalSummonCondition()
+{
+	__asm
+	{
+	hook:
+		ADD ESP, 0x4
+		PUSH EAX
+		PUSH ESI
+		AND EAX, 0xFFF 
+		PUSH EAX
+		CALL HookManager::Dispatch_NormalSummonCondition
+		CMP AL, 0x0
+		JZ hook_end
+		CMP AL, 0x1
+		JNZ hook_cannot
+	hook_can:
+		POP EAX
+		PUSH 0x005aad71
+		RET
+	hook_cannot:
+		POP EAX
+		MOV EAX, 0x0
+		PUSH 0x005aadb1
+		RET
+	hook_end:
+		POP EAX
+		SUB ESP, 0x4
+		JMP[gNormalSummonTrampoline]
+	}
+}
+void HookManager::Register_Phase(uint32_t phase, Event event)
+{
+	phaseHooks.push_back({ phase, event, false });
+}
+void __stdcall HookManager::Dispatch_Phase(uint32_t phase)
+{
+	if (phase == 0)
+	{
+		for (auto& hook : phaseHooks)
+		{
+			hook.resolved = false;
+		}
+	}
+
+	for (auto& hook : phaseHooks)
+	{
+		if (hook.phase == phase && !hook.resolved)
+		{
+			hook.resolved = true;
+			hook.event();
+		}
+	}
+}
+__declspec(naked) void PatchPhase()
+{
+	__asm
+	{
+	hook:
+		PUSH DWORD PTR DS : [ESP + 4]
+		CALL HookManager::Dispatch_Phase
+	hook_end :
+		JMP[gPhaseTrampoline]
+	}
+}
+void HookManager::Register_StatChange(uint16_t id, StatChange statChange)
+{
+	// Check if the card ID is already registered
+	for (const auto& hook : statChangeHooks)
+	{
+		if (hook.cardID == id) return;
+	}
+	statChangeHooks.push_back({ id, statChange });
+}
+bool __stdcall HookManager::Dispatch_StatChange(uint16_t id, uint32_t statAddress, uint32_t playerIdx, uint32_t zoneIdx)
+{
+	for (const auto& hook : statChangeHooks)
+	{
+		if (hook.cardID == id)
+		{
+			hook.statChange(statAddress, playerIdx, zoneIdx);
+			return true;
+		}
+	}
+	return false;
+}
+__declspec(naked) void PatchStatChange()
+{
+	__asm
+	{
+	hook:
+		PUSH EAX
+		PUSH EDI
+		PUSH DWORD PTR DS : [ESP + 68]
+		PUSH ESP
+		PUSH EAX
+		CALL HookManager::Dispatch_StatChange
+		TEST AL, AL
+		POP EAX
+		JZ hook_end
+
+		MOV EAX, 0x0056df89
+		JMP EAX
+	hook_end :
+		JMP[gStatChangeTrampoline]
+	}
+}
+void HookManager::Regigster_StatChangeEffect(uint16_t effectId, StatChange statChange)
+{
+	// Check if the effect ID is already registered
+	for (const auto& hook : statChangeHooks2)
+	{
+		if (hook.cardID == effectId) return;
+	}
+	statChangeHooks2.push_back({ effectId, statChange });
+}
+bool __stdcall HookManager::Dispatch_StatChangeEffect(uint16_t effectId, uint32_t statAddress, uint32_t playerIdx, uint32_t zoneIdx)
+{
+	for (const auto& hook : statChangeHooks2)
+	{
+		if (hook.cardID == effectId)
+		{
+			hook.statChange(statAddress, playerIdx, zoneIdx);
+			return true;
+		}
+	}
+	return false;
+}
+__declspec(naked) void PatchStatCHange2()
+{
+	__asm
+	{
+	hook:
+		PUSH EAX
+		PUSH DWORD PTR DS : [ESP + 0x4C]
+		PUSH DWORD PTR DS : [ESP + 0x4C]
+		PUSH ESP
+		PUSH EAX
+		CALL HookManager::Dispatch_StatChangeEffect
+		TEST AL, AL
+		POP EAX
+		JZ hook_end
+		MOV EAX, 0x0056f083
+		JMP EAX
+	hook_end :
+		JMP[gStatChangeTrampoline2]
+	}
+}
+void HookManager::Register_StatChangeEquip(uint16_t cardID, StatChange statChange)
+{
+	// Check if the equip ID is already registered
+	for (const auto& hook : statChangeHooks3)
+	{
+		if (hook.cardID == cardID) return;
+	}
+	statChangeHooks3.push_back({ cardID, statChange });
+}
+bool HookManager::Dispatch_StatChangeEquip(uint16_t cardID, uint32_t statAddress, uint32_t playerIdx, uint32_t zoneIdx)
+{
+	for (const auto& hook : statChangeHooks3)
+	{
+		if (hook.cardID == cardID)
+		{
+			hook.statChange(statAddress, playerIdx, zoneIdx);
+			return true;
+		}
+	}
+	return false;
+}
+__declspec(naked) void PatchStatChange3()
+{
+	__asm
+	{
+	hook:
+		PUSH EAX
+		PUSH DWORD PTR DS : [ESP + 0x4C]
+		PUSH DWORD PTR DS : [ESP + 0x4C]
+		PUSH ESP
+		PUSH EAX
+		CALL HookManager::Dispatch_StatChangeEquip
+		TEST AL, AL
+		POP EAX
+		JZ hook_end
+		MOV EAX, 0x0056f083
+		JMP EAX
+	hook_end :
+		JMP[gStatChangeTrampoline3]
+	}
+}
+void HookManager::Register_AfterDamageCalculation(Event event)
+{
+	afterDamageCalculationHooks.push_back(event);
+}
+void HookManager::Dispatch_AfterDamageCalculation()
+{
+	for (const auto& hook : afterDamageCalculationHooks)
+	{
+		hook();
+	}
+}
+__declspec(naked) void PatchAfterDamageCalculation()
+{
+	__asm
+	{
+	hook:
+		CALL HookManager::Dispatch_AfterDamageCalculation
+	hook_end :
+		JMP[gAfterDamageCalculationTrampoline]
+	}
+}
+void HookManager::Register_NormalSummonTrigger(uint16_t id)
+{
+	// Check if the card ID is already registered
+	for (const auto& hook : normalSummonTriggerHooks)
+	{
+		if (hook.cardID == id) return;
+	}
+	normalSummonTriggerHooks.push_back({ id });
+}
+void HookManager::Register_NormalSummonTrigger(uint16_t id, Event1 event)
+{
+	// Check if the card ID is already registered
+	for (const auto& hook : normalSummonTriggerHooks)
+	{
+		if (hook.cardID == id) return;
+	}
+	normalSummonCustomTriggerHooks.push_back({ id, event });
+}
+bool __stdcall HookManager::Dispatch_NormalSummonTrigger(uint16_t id, uint32_t summonParam)
+{
+	bool triggerEffect = false;
+	for (const auto& hook : normalSummonTriggerHooks)
+	{
+		if (hook.cardID == id)
+		{
+			triggerEffect = true;
+		}
+	}
+	for (const auto& hook : normalSummonCustomTriggerHooks)
+	{
+		if (hook.cardID == id)
+		{
+			uint32_t playerIdx = summonParam & 1;
+			uint32_t zoneIdx = (summonParam >> 1) & 0x1F;
+			hook.event(playerIdx, zoneIdx);
+		}
+	}
+	return triggerEffect;
+}
+__declspec(naked) void PatchNormalSummonTrigger()
+{
+	__asm
+	{
+	hook:
+		PUSH EAX
+		PUSH DWORD PTR DS : [0x00a55080]
+		PUSH EAX
+		CALL HookManager::Dispatch_NormalSummonTrigger
+		TEST AL, AL
+		POP EAX
+		JZ hook_end
+
+		PUSH 0x005ac110
+		RET
+	hook_end :
+		JMP[gNormalSummonTriggerTrampoline]
+	}
+}
+void HookManager::Register_SpecialSummonTrigger(uint16_t id)
+{
+	// Check if the card ID is already registered
+	for (const auto& hook : specialSummonTriggerHooks)
+	{
+		if (hook.cardID == id) return;
+	}
+	specialSummonTriggerHooks.push_back({ id });
+}
+void HookManager::Register_SpecialSummonTrigger(uint16_t id, Event1 event)
+{
+	// Check if the card ID is already registered
+	for (const auto& hook : specialSummonTriggerHooks)
+	{
+		if (hook.cardID == id) return;
+	}
+	specialSummonCustomTriggerHooks.push_back({ id, event });
+}
+bool __stdcall HookManager::Dispatch_SpecialSummonTrigger(uint16_t id, uint32_t summonParam)
+{
+	bool triggerEffect = false;
+	for (const auto& hook : specialSummonTriggerHooks)
+	{
+		if (hook.cardID == id)
+		{
+			triggerEffect = true;
+		}
+	}
+	for (const auto& hook : specialSummonCustomTriggerHooks)
+	{
+		if (hook.cardID == id)
+		{
+			uint32_t playerIdx = summonParam & 1;
+			uint32_t zoneIdx = (summonParam >> 1) & 0x1F;
+			hook.event(playerIdx, zoneIdx);
+		}
+	}
+	return triggerEffect;
+}
+__declspec(naked) void PatchSpecialSummonTrigger()
+{
+	__asm
+	{
+	hook:
+		PUSH EAX
+		PUSH DWORD PTR DS : [0x00a55080]
+		PUSH EAX
+		CALL HookManager::Dispatch_SpecialSummonTrigger
+		TEST AL, AL
+		POP EAX
+		JZ hook_end
+
+		PUSH 0x005ad63a
+		RET
+	hook_end :
+		JMP[gSpecialSummonTriggerTrampoline]
+	}
+}
+__declspec(naked) void PatchSpecialSummonTrigger2()
+{
+	__asm
+	{
+	hook:
+		PUSH EAX
+		PUSH DWORD PTR DS : [0x00a55080]
+		PUSH EAX
+		CALL HookManager::Dispatch_SpecialSummonTrigger
+		TEST AL, AL
+		POP EAX
+		JZ hook_end
+
+		PUSH 0x005ad149
+		RET
+	hook_end :
+		JMP[gSpecialSummonTriggerTrampoline]
+	}
+}
+void HookManager::Register_OnSentToGraveTrigger(uint16_t id, Event1 event)
+{
+	// Check if the card ID is already registered
+	for (const auto& hook : onSentToGraveTriggerHooks)
+	{
+		if (hook.cardID == id) return;
+	}
+	onSentToGraveTriggerHooks.push_back({ id, event });
+}
+bool __stdcall HookManager::Dispatch_OnSentToGraveTrigger(uint16_t id, uint32_t playerIdx, uint32_t zoneIdx)
+{
+	for (const auto& hook : onSentToGraveTriggerHooks)
+	{
+		if (hook.cardID == id)
+		{
+			if (hook.event != nullptr)
+			{
+				hook.event(playerIdx, zoneIdx);
+				return false;
+			}
+			else
+			{
+				return true;
+			}
+		}
+	}
+	return false;
+}
+__declspec(naked) void PatchOnSentToGraveTrigger()
+{
+	__asm
+	{
+	hook:
+		PUSH EAX
+		PUSH DWORD PTR DS : [ESP + 0x18]
+		PUSH EDI
+		PUSH EAX
+		CALL HookManager::Dispatch_OnSentToGraveTrigger
+		TEST AL, AL
+		POP EAX
+		JZ hook_end
+
+		PUSH 0x00577080
+		RET
+	hook_end :
+		JMP[gOnSentToGraveTriggerTrampoline]
+	}
+}
+__declspec(naked) void PatchOnSentToGraveTrigger2()
+{
+	__asm
+	{
+	hook:
+		PUSH EAX
+		PUSH DWORD PTR DS : [ESP + 0x18]
+		PUSH EDI
+		PUSH EAX
+		CALL HookManager::Dispatch_OnSentToGraveTrigger
+		TEST AL, AL
+		POP EAX
+		JZ hook_end
+
+		PUSH 0x00577e19
+		RET
+	hook_end :
+		JMP[gOnSentToGraveTriggerTrampoline2]
+	}
+}
+void HookManager::Register_BanishOnLeavingField(uint16_t id)
+{
+	// Check if the card ID is already registered
+	for (const auto& hook : banishOnLeavingFieldHooks)
+	{
+		if (hook.cardID == id) return;
+	}
+	banishOnLeavingFieldHooks.push_back({ id });
+}
+bool __stdcall HookManager::Dispatch_BanishOnLeavingField(uint16_t id)
+{
+	for (const auto& hook : banishOnLeavingFieldHooks)
+	{
+		if (hook.cardID == id)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+__declspec(naked) void PatchBanishOnLeavingField()
+{
+	__asm
+	{
+	hook:
+		ADD ESP, 0x4
+		PUSH EAX
+		AND EAX, 0xFFFF
+		PUSH EAX
+		CALL HookManager::Dispatch_BanishOnLeavingField
+		TEST AL, AL
+		POP EAX
+		JZ hook_end
+
+		OR EBX, 0x10000
+	hook_end :
+		SUB ESP, 0x4
+		JMP[gBanishOnLeavingFieldTrampoline]
+	}
+}
+void HookManager::Register_InitialSummonState(uint16_t cardID, uint8_t state, bool useDefaultNS)
+{
+	// Check if the card ID is already registered
+	for (const auto& hook : initialSummonStateHooks)
+	{
+		if (hook.cardID == cardID) return;
+	}
+	initialSummonStateHooks.push_back({ cardID, state, useDefaultNS });
+}
+uint8_t __stdcall HookManager::Dispatch_InitialSummonState(uint16_t cardID, uint32_t summonType)
+{
+	if (GameData::GetSelectedLocation() == Location::EXTRA) return 0xff;
+	for (const auto& hook : summonStateHooks2)
+	{
+		if (hook.cardID == cardID)
+		{
+			if (summonType == 0 && hook.useDefaultNS) return 0;
+			return 0xfe;
+		}
+	}
+	for (const auto& hook : initialSummonStateHooks)
+	{
+		if (hook.cardID == cardID)
+		{
+			if (summonType == 0 && hook.useDefaultNS) return 0;
+			return hook.stateCode;
+		}
+	}
+	return 0;
+}
+__declspec(naked) void PatchInitialSummonState()
+{
+	__asm
+	{
+	hook:
+		PUSH EAX
+		PUSH DWORD PTR DS : [ESP + 0x250]
+		PUSH EAX
+		CALL HookManager::Dispatch_InitialSummonState
+		TEST AL, AL
+		JZ hook_end
+
+		ADD ESP, 0x4
+		MOV CL, BYTE PTR DS : [0x00a57808]
+		POP EDI
+		AND ECX, 0xFF
+		POP ESI
+		OR CH, AL
+		POP EBP
+		MOV WORD PTR DS : [0x00a57808] , CX
+
+		PUSH 0x0059e0e1
+		RET
+	hook_end:
+		POP EAX
+		JMP[gInitialSummonStateTrampoline]
+	}
+}
+void HookManager::Register_SummonState(uint8_t stateCode, State state)
+{
+	// Check if the state code is already registered
+	for (const auto& hook : summonStateHooks)
+	{
+		if (hook.stateCode == stateCode) return;
+	}
+	summonStateHooks.push_back({ stateCode, state});
+}
+void HookManager::Register_SummonState(uint16_t cardID, State state, bool useDefaultNS)
+{
+	// Check if the card ID is already registered
+	for (const auto& hook : summonStateHooks2)
+	{
+		if (hook.cardID == cardID) return;
+	}
+	summonStateHooks2.push_back({ cardID, state, useDefaultNS });
+}
+uint8_t __stdcall HookManager::Dispatch_SummonState(uint8_t stateCode)
+{
+	if (stateCode == 0xff) return HookManager::ExtraSummonState();
+	if (stateCode == 0xfe)
+	{
+		for (const auto& hook : summonStateHooks2)
+		{
+			if (hook.cardID == FUN::GetCardID(GameData::GetCardUsed()))
+			{
+				return hook.state();
+			}
+		}
+	}
+	for (const auto& hook : summonStateHooks)
+	{
+		if (hook.stateCode == stateCode)
+		{
+			return hook.state();
+		}
+	}
+	return 2; // Not found
+}
+__declspec(naked) void PatchSummonState()
+{
+	__asm
+	{
+	hook:
+		AND ECX, 0xFFFF
+		PUSH EBX
+		SHR ECX, 0x8
+		PUSH EBP
+		PUSH ESI
+		PUSH ECX
+		PUSH EAX
+		PUSH ECX
+		CALL HookManager::Dispatch_SummonState
+		CMP AL, 0x2
+		JE hook_end
+
+		ADD ESP, 0x8
+		CMP AL, 0x0
+		JE hook_0
+	hook_1:
+		AND WORD PTR DS:[0x00a57804], 0xfffd
+		MOV AL, 0x1
+		JMP hook_out
+
+	hook_0:
+		XOR EAX, EAX
+
+	hook_out:
+		POP ESI
+		POP EBP
+		POP EBX
+		ADD ESP, 0x234
+		PUSH 0x0059eb1f
+		RET
+		
+	hook_end:
+		POP EAX
+		POP ECX
+		PUSH 0x0059def9
+		RET
+	}
+}
+void HookManager::Register_SelectionListPopulation(uint16_t cardID, Event event)
+{
+	// Check if the card ID is already registered
+	for (const auto& hook : selectionListPopulationHooks)
+	{
+		if (hook.cardID == cardID) return;
+	}
+	selectionListPopulationHooks.push_back({ cardID, event });
+}
+bool __stdcall HookManager::Dispatch_SelectionListPopulation(uint16_t cardID)
+{
+	for (const auto& hook : selectionListPopulationHooks)
+	{
+		if (hook.cardID == cardID)
+		{
+			hook.event();
+			return true;
+		}
+	}
+	return false;
+}
+__declspec(naked) void PatchSelectionListPopulation()
+{
+	__asm
+	{
+	hook:
+		PUSH EBX
+		AND EBX, 0xFFFF
+		PUSH ECX
+		PUSH EDX
+		PUSH EAX
+		PUSH EBX
+		CALL HookManager::Dispatch_SelectionListPopulation
+		TEST AL, AL
+		POP EAX
+		POP EDX
+		POP ECX
+		POP EBX
+		JZ hook_end
+
+		MOV ESI, 0x4
+		PUSH 0x0059c432
+		RET
+	hook_end :
+		CMP EBX, 0x460
+		JMP[gSelectionListPopulationTrampoline]
+	}
+}
+void HookManager::Register_SpellSpeed(uint32_t cardID, uint32_t speed)
+{
+	// Check if the card ID is already registered
+	for (const auto& hook : spellSpeedHooks)
+	{
+		if (hook.CardID == cardID) return;
+	}
+	spellSpeedHooks.push_back({ cardID, speed });
+}
+uint32_t __stdcall HookManager::Dispatch_SpellSpeed(uint32_t cardID)
+{
+	for (const auto& hook : spellSpeedHooks)
+	{
+		if (hook.CardID == cardID)
+		{
+			return hook.Speed;
+		}
+	}
+	return 0; // Default speed if not found
+}
+__declspec(naked) void PatchSpellSpeed()
+{
+	__asm
+	{
+	hook:
+		PUSH EAX
+		PUSH EAX
+		CALL HookManager::Dispatch_SpellSpeed
+		TEST EAX, EAX
+		JZ hook_end
+
+		CMP EAX, 0x1
+		JE hook_1
+		CMP EAX, 0x2
+		JE hook_2
+		CMP EAX, 0x3
+		JE hook_3
+		JMP hook_end
+	hook_1 :
+		POP EAX
+		MOV EAX, 0x0057e09a
+		JMp EAX
+	hook_2 :
+		POP EAX
+		MOV EAX, 0x0057e0a2
+		JMP EAX
+	hook_3 :
+		POP EAX
+		POP EDI
+		MOV EAX, 0x3
+		POP ESI
+		PUSH 0x0057e0a9
+		RET
+	hook_end :
+		POP EAX
+		JMP[gSpellSpeedTrampoline]
+	}
+}
+
+void HookManager::Register_HasEffectInHand(uint16_t cardID)
+{
+	// Check if the card ID is already registered
+	for (const auto& id : hasEffectInHandHooks)
+	{
+		if (id == cardID) return;
+	}
+	hasEffectInHandHooks.push_back(cardID);
+}
+bool __stdcall HookManager::Dispatch_HasEffectInHand(uint16_t cardID)
+{
+	for (const auto& id : hasEffectInHandHooks)
+	{
+		if (id == cardID)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+__declspec(naked) void PatchHasEffectInHand()
+{
+	__asm
+	{
+	hook:
+		PUSH EAX
+		PUSH EAX
+		CALL HookManager::Dispatch_HasEffectInHand
+		TEST AL, AL
+		POP EAX
+		JZ hook_end
+		PUSH 0x00568302
+		RET
+	hook_end :
+		JMP[gHasEffectInHandTrampoline]
+	}
+}
+__declspec(naked) void PatchHasEffectInHand2()
+{
+	__asm
+	{
+	hook:
+		PUSH EAX
+		PUSH EAX
+		CALL HookManager::Dispatch_HasEffectInHand
+		TEST AL, AL
+		POP EAX
+		JZ hook_end
+		PUSH 0x005b8e1b
+		RET
+	hook_end :
+		JMP[gHasEffectInHandTrampoline2]
+	}
+}
+void HookManager::Register_UnRevivable(uint16_t cardID)
+{
+	// Check if the card ID is already registered
+	for (const auto& id : unRevivableHooks)
+	{
+		if (id == cardID) return;
+	}
+	unRevivableHooks.push_back(cardID);
+}
+bool __stdcall HookManager::Dispatch_UnRevivable(uint16_t cardIntID)
+{
+	uint16_t cardID = FUN::GetCardID(cardIntID);
+
+	for (const auto& id : unRevivableHooks)
+	{
+		if (id == cardID)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+__declspec(naked) void PatchCanBeRevived()
+{
+	__asm
+	{
+	hook:
+		AND EAX, 0xFFF
+		PUSH EAX
+		PUSH EAX
+		CALL HookManager::Dispatch_UnRevivable
+		TEST AL, AL
+		POP EAX
+		JZ hook_end
+		POP ESI
+		MOV EAX, 0x0
+		PUSH 0x00568bfa
+		RET
+	hook_end :
+		JMP[gCanBeRevivedTrampoline]
+	}
+}
+void HookManager::Register_UnTargetable(uint16_t cardID)
+{
+	// Check if the card ID is already registered
+	for (const auto& id : unTargetableHooks)
+	{
+		if (id == cardID) return;
+	}
+	unTargetableHooks.push_back(cardID);
+}
+bool __stdcall HookManager::Dispatch_UnTargetable(uint8_t side, uint8_t zone)
+{
+	uint16_t cardID = GameData::GetDuel()->players[side].monsterZones[zone].card.GetCardID();
+	for (const auto& id : unTargetableHooks)
+	{
+		if (id == cardID)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+__declspec(naked) void PatchCanBeTargeted()
+{
+	__asm
+	{
+	hook:
+		PUSH EAX
+		PUSH DWORD PTR DS : [ESP + 0xc]
+		PUSH DWORD PTR DS : [ESP + 0xc]
+		CALL HookManager::Dispatch_UnTargetable // I could probably just use __cdecl for these, but I don't care
+		TEST AL, AL
+		POP EAX
+		JZ hook_end
+		XOR EAX, EAX
+		PUSH 0x0056c547
+		RET
+	hook_end :
+		JMP[gCanBeTargetedTrampoline]
+	}
+}
+// Card Effect Scripts
+int __cdecl HookManager::M_GetEffectScriptIndex(uint32_t cardIntID)
+{
+	uint16_t index = cardIntID & 0xFFF;
+	if (effectScripts[index].CardID == 0)
+	{
+		return -1;
+	}
+
+	return index;
+}
+__declspec(naked) void PatchCardEffectScript1()
+{
+	__asm
+	{
+	hook:
+		PUSH EDX
+		MOV EDX, DWORD PTR DS:[0x5ed0a8]
+		MOV EAX, DWORD PTR DS:[ECX * 0x8 + EDX + 0x8]
+		POP EDX
+		PUSH 0x0059dc1a
+		RET
+	}
+}
+__declspec(naked) void PatchCardEffectScript2()
+{
+	__asm
+	{
+	hook:
+		PUSH EDX
+		MOV EDX, DWORD PTR DS :[0x5ed0a8]
+		MOV EDI, DWORD PTR DS:[ECX * 0x8 + EDX + 0x8]
+		POP EDX
+		PUSH 0x0059dc69
+		RET
+	}
+}
+__declspec(naked) void PatchCardEffectScript3()
+{
+	__asm
+	{
+	hook:
+		PUSH EDX
+		MOV EDX, DWORD PTR DS :[0x5ed0a8]
+		MOV ESI, DWORD PTR DS:[ECX * 0x8 + EDX + 0x8]
+		POP EDX
+		PUSH 0x0059dce9
+		RET
+	}
+}
+__declspec(naked) void PatchCardEffectScript4()
+{
+	__asm
+	{
+	hook:
+		PUSH EDX
+		MOV EDX, DWORD PTR DS:[0x5ed0a8]
+		MOV ECX, DWORD PTR DS:[EAX + EDX + 0xC]
+		MOV EDI, DWORD PTR DS:[EAX + EDX + 0x8]
+		POP EDX
+		PUSH 0x0059dd5b
+		RET
+	}
+}
+__declspec(naked) void PatchCardEffectScript5()
+{
+	__asm
+	{
+	hook:
+		PUSH EDX
+		MOV EDX, DWORD PTR DS :[0x5ed0a8]
+		MOV EAX, DWORD PTR DS:[ECX * 0x8 + EDX + 0x10]
+		POP EDX
+		PUSH 0x0059ddf6
+		RET
+	}
+}
+__declspec(naked) void PatchCardEffectScript6()
+{
+	__asm
+	{
+	hook:
+		PUSH EDX
+		MOV EDX, DWORD PTR DS : [0x5ed0a8]
+		MOV EAX, DWORD PTR DS : [ECX * 0x8 + EDX + 0x14]
+		POP EDX
+		PUSH 0x0059de36
+		RET
+	}
+}
+__declspec(naked) void PatchCardEffectScript7()
+{
+	__asm
+	{
+	hook:
+		PUSH EDX
+		MOV EDX, DWORD PTR DS : [0x5ed0a8]
+		MOV EAX, DWORD PTR DS: [ECX * 0x8 + EDX + 0x4]
+		POP EDX
+		PUSH 0x0059de73
+		RET
+	}
+}
+__declspec(naked) void PatchCardEffectScript8()
+{
+	__asm
+	{
+	hook:
+		PUSH EDX
+		MOV EDX, DWORD PTR DS : [0x5ed0a8]
+		MOV EAX, DWORD PTR DS : [EAX * 0x8 + EDX + 0x8]
+		POP EDX
+		PUSH 0x005b3e53
+		RET
+	}
+}
+__declspec(naked) void PatchCardEffectScript9()
+{
+	__asm
+	{
+	hook:
+		PUSH ECX
+		MOV ECX, DWORD PTR DS : [0x5ed0a8]
+		MOV EDX, DWORD PTR DS : [EAX * 0x8 + ECX + 0x10]
+		POP ECX
+		PUSH 0x005bb1f8
+		RET
+	}
+}
+__declspec(naked) void PatchCardEffectScript10()
+{
+	__asm
+	{
+	hook:
+		PUSH ECX
+		MOV ECX, DWORD PTR DS : [0x5ed0a8]
+		MOV EAX, DWORD PTR DS : [EDX * 0x8 + ECX + 0x14]
+		POP ECX
+		PUSH 0x005bb31d
+		RET
+	}
+}
+__declspec(naked) void PatchCardEffectScript11()
+{
+	__asm
+	{
+	hook:
+		PUSH ECX
+		MOV ECX, DWORD PTR DS : [0x5ed0a8]
+		MOV EAX, DWORD PTR DS : [EDX * 0x8 + ECX + 0x4]
+		POP ECX
+		PUSH 0x005bba28
+		RET
+	}
+}
+// Fusion reqs
+uint32_t __cdecl HookManager::M_GetNumOfFusionReqs(uint32_t _cardIntID)
+{
+	uint16_t cardIntID = _cardIntID & 0xFFF;
+	uint16_t cardID = FUN::GetCardID(cardIntID & 0xFFF);
+	if (fusionRecipes2[cardIntID].Result == cardID)
+	{
+		return 2;
+	}
+	if (fusionRecipes3[cardIntID].Result == cardID)
+	{
+		return 3;
+	}
+	return 0;
+}
+int __cdecl HookManager::M_GetFusionMaterial(uint32_t _cardIntID, uint32_t materialIndex)
+{
+	uint16_t cardIntID = _cardIntID & 0xFFF;
+	uint16_t cardID = FUN::GetCardID(cardIntID & 0xFFF);
+	if (fusionRecipes2[cardIntID].Result == cardID)
+	{
+		return FUN::GetCardIntID(fusionRecipes2[cardIntID].Materials[materialIndex]);
+	}
+	if (fusionRecipes3[cardIntID].Result == cardID)
+	{
+		return FUN::GetCardIntID(fusionRecipes3[cardIntID].Materials[materialIndex]);
+	}
+	return 0;
+}
+int __cdecl HookManager::M_CanFuse(uint32_t player, uint32_t _fusionIntId, uint16_t* out)
+{
+	uint32_t fusionIntId = _fusionIntId & 0xFFF;
+	player &= 1;
+
+	if (FUN::GetMonsterType(fusionIntId) >= 0x15) return 0;
+	if (FUN::GetCardSubType(fusionIntId) != 2) return 0;
+
+	uint16_t id = FUN::GetCardID(fusionIntId);
+	if (id > 1999)
+		id = (uint16_t)(id - 2000);
+
+	if (FUN::IsCardProhibited(fusionIntId, 0xFFFFFFFF)) return 0;
+
+	const uint32_t numOfReqs = HookManager::M_GetNumOfFusionReqs(fusionIntId);
+	if (numOfReqs != 2 && numOfReqs != 3) return 0;
+
+	uint16_t need[3] = {};
+	if (numOfReqs == 2)
+	{
+		if (fusionRecipes2[fusionIntId].Result == 0) return 0;
+		need[0] = fusionRecipes2[fusionIntId].Materials[0];
+		need[1] = fusionRecipes2[fusionIntId].Materials[1];
+	}
+	else
+	{
+		if (fusionRecipes3[fusionIntId].Result == 0) return 0;
+		need[0] = fusionRecipes3[fusionIntId].Materials[0];
+		need[1] = fusionRecipes3[fusionIntId].Materials[1];
+		need[2] = fusionRecipes3[fusionIntId].Materials[2];
+	}
+
+	uint16_t slot1, slot2, slot3;
+
+	if (numOfReqs == 2)
+	{
+		slot1 = (uint16_t)FUN::FUN_00591A00(player, need[0], 0xFFFF, 0xFFFF);
+		out[1] = slot1;
+		slot2 = (uint16_t)FUN::FUN_00591A00(player, need[1], slot1, 0xFFFF);
+		out[0] = slot2;
+
+		if (slot1 == 0xFFFF || slot2 == 0xFFFF) return 0;
+
+		if (FUN::W_BothLocked(player, out[0], out[1])) return 0;
+	}
+	else
+	{
+		slot1 = (uint16_t)FUN::FUN_00591A00(player, need[0], 0xFFFF, 0xFFFF);
+		out[2] = slot1;
+		slot2 = (uint16_t)FUN::FUN_00591A00(player, need[1], slot1, 0xFFFF);
+		out[1] = slot2;
+		slot3 = (uint16_t)FUN::FUN_00591A00(player, need[2], slot1, slot2);
+		out[0] = slot3;
+
+		if (slot1 == 0xFFFF || slot2 == 0xFFFF || slot3 == 0xFFFF) return 0;
+
+		// Stock checks several pairs; reject if any forbidden pair is both locked
+		if (FUN::W_BothLocked(player, out[0], out[1])) return 0;
+		if (FUN::W_BothLocked(player, out[0], out[2])) return 0;
+		if (FUN::W_BothLocked(player, out[1], out[2])) return 0;
+	}
+
+	if (FUN::FUN_0056A030(player) >= 0) return 1;
+
+	// No free zone: at least one material on field must free a zone
+	if (numOfReqs == 2)
+	{
+		if (FUN::W_FieldCanFreeZone(player, out[0]) || FUN::W_FieldCanFreeZone(player, out[1])) return 1;
+	}
+	else
+	{
+		if (FUN::W_FieldCanFreeZone(player, out[0]) ||
+			FUN::W_FieldCanFreeZone(player, out[1]) ||
+			FUN::W_FieldCanFreeZone(player, out[2]))
+			return 1;
+	}
+
+	return 0;
+}
